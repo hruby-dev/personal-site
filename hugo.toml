@@ -1,0 +1,4 @@
+theme="archie"
+baseURL = 'www.hruby.xyz'
+locale = 'en-us'
+title = 'My New Hugo Project'
