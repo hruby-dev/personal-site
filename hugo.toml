@@ -1,7 +1,15 @@
 theme="archie"
 baseURL = 'www.hruby.xyz'
 locale = 'en-us'
-title = 'My New Hugo Project'
+title = '_epsln'
+pygmentsstyle = "monokai"
+pygmentscodefences = true
+pygmentscodefencesguesssyntax = true
+[params]
+    color="dark"
+	mode="auto"
+	useCDN=false
+	subtitle = "Welcome to my blog about security research topics and CTFs I find interesting :)"
 [caches]
   [caches.images]
     dir = ':cacheDir/images'
