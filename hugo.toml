@@ -2,3 +2,6 @@ theme="archie"
 baseURL = 'www.hruby.xyz'
 locale = 'en-us'
 title = 'My New Hugo Project'
+[caches]
+  [caches.images]
+    dir = ':cacheDir/images'
