@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html><head lang="en"><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>WinHardPacked - US Cyber Open 2026 - Writeup - _epsln</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Writeup of my favorite challenge from the US Cyber Open 2026 CTF." />
+	<meta property="og:image" content="//localhost:1313/"/>
+	<meta property="og:url" content="//localhost:1313/posts/winhardpacked_writeup/">
+	<meta property="og:site_name" content="_epsln">
+	<meta property="og:title" content="WinHardPacked - US Cyber Open 2026 - Writeup">
+	<meta property="og:description" content="Writeup of my favorite challenge from the US Cyber Open 2026 CTF.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-06-27T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-06-27T00:00:00+00:00">
+		<meta property="article:tag" content="CTFs">
+		<meta property="article:tag" content="Reversing">
+
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="WinHardPacked - US Cyber Open 2026 - Writeup">
+	<meta name="twitter:description" content="Writeup of my favorite challenge from the US Cyber Open 2026 CTF.">
+
+        <link href="//localhost:1313/css/fonts.11a1877508139eac0b5b4852ceb110c35641b3533321e66e39149e901ed5756b.css" rel="stylesheet">
+	
+
+	
+	<link rel="stylesheet" type="text/css" media="screen" href="//localhost:1313/css/main.e174c89d1fad318f874d22964b6f0f070a8491ff9295c2ceb1de9bcf885989a4.css" />
+		<link id="darkModeStyle" rel="stylesheet" type="text/css" href="//localhost:1313/css/dark.bc345569a47b30214f5e4808710942f49eacca5e8591529e7cc6e87d698c4f15.css" media="(prefers-color-scheme: dark)"  />
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="//localhost:1313/">_epsln</a>
+	</div>
+	<nav>
+		
+		<a href="/">Home</a>
+		
+		<a href="/posts">All posts</a>
+		
+		<a href="/about">About</a>
+		
+		<a href="/tags">Tags</a>
+		
+		
+	</nav>
+</header>
+
+<main>
+  <article>
+    <div class="post-container">
+      
+      <div class="post-content">
+        <div class="title">
+          <h1 class="title">WinHardPacked - US Cyber Open 2026 - Writeup</h1>
+          <div class="meta">Posted on Jun 27, 2026</div>
+        </div>
+        
+        <div class="tldr">
+          <strong>tl;dr:</strong>
+          UPX packed windows executable with an RC4 flagchecker.
+        </div>
+        <section class="body">
+          <p>We are presented with a windows executable. I first ran <code>file</code> to check whether it was somehow mutated or needed patching for some reason.</p>
+<pre tabindex="0"><code>file WinHardPacked.exe
+WinHardPacked.exe: PE32 executable for MS Windows 5.00 (console), Intel i386, UPX compressed, 3 sections
+</code></pre><p>I noticed the executable was compressed with UPX, so I unpacked it before doing anything else.</p>
+<pre tabindex="0"><code>upx -d WinHardPacked.exe -o unpacked_winhard.exe
+</code></pre><p>I opened the entrypoint in the decompiler and saw it was referencing a function <code>FUN_0040153d</code>, so I jumped into it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>undefined4 <span style="color:#66d9ef">__cdecl</span> <span style="color:#a6e22e">FUN_004017d9</span>(<span style="color:#66d9ef">int</span> param_1,undefined4 <span style="color:#f92672">*</span>param_2)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> iVar1;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>_Format;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (param_1 <span style="color:#f92672">==</span> <span style="color:#ae81ff">2</span>) {
+</span></span><span style="display:flex;"><span>    iVar1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">FUN_0040153d</span>((<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>)param_2[<span style="color:#ae81ff">1</span>]);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (iVar1 <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>      _Format <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;You beat a packed Windows executable! Wow!</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      _Format <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Sorry, not quite there yet.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">_printf</span>(_Format);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">_printf</span>(<span style="color:#e6db74">&#34;Usage: %s &lt;password&gt;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>,<span style="color:#f92672">*</span>param_2);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This was clearly a flag checker, so I needed to reverse the algorithm that validates the user input, which lives in <code>FUN_0040153d</code>.</p>
+<p>Opening the function, I noticed an encrypted flag array alongside two other arrays.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>flag_array <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0x65</span>, <span style="color:#ae81ff">0x23</span>, <span style="color:#ae81ff">0xca</span>, <span style="color:#ae81ff">0x3d</span>, <span style="color:#ae81ff">0xc4</span>, <span style="color:#ae81ff">0xde</span>, <span style="color:#ae81ff">0xc6</span>, <span style="color:#ae81ff">0x21</span>, <span style="color:#ae81ff">0x98</span>, <span style="color:#ae81ff">0x4b</span>, <span style="color:#ae81ff">0xd6</span>, <span style="color:#ae81ff">0x9c</span>, <span style="color:#ae81ff">0x6d</span>, <span style="color:#ae81ff">0xf6</span>, <span style="color:#ae81ff">0x1a</span>, <span style="color:#ae81ff">0xb9</span>, <span style="color:#ae81ff">0xe5</span>, <span style="color:#ae81ff">0xfb</span>, <span style="color:#ae81ff">0xdb</span>, <span style="color:#ae81ff">0xc7</span>, <span style="color:#ae81ff">0x22</span>, <span style="color:#ae81ff">0xff</span>, <span style="color:#ae81ff">0x64</span>, <span style="color:#ae81ff">0x88</span>, <span style="color:#ae81ff">0xf3</span>, <span style="color:#ae81ff">0x5c</span>, <span style="color:#ae81ff">0x8c</span>, <span style="color:#ae81ff">0x07</span>, <span style="color:#ae81ff">0xcb</span>, <span style="color:#ae81ff">0xfd</span>, <span style="color:#ae81ff">0x3d</span>, <span style="color:#ae81ff">0xa6</span>, <span style="color:#ae81ff">0xd8</span>, <span style="color:#ae81ff">0xb3</span>, <span style="color:#ae81ff">0xdb</span>, <span style="color:#ae81ff">0xf7</span>, <span style="color:#ae81ff">0x5a</span>, <span style="color:#ae81ff">0xe9</span>, <span style="color:#ae81ff">0x85</span>, <span style="color:#ae81ff">0x22</span>, <span style="color:#ae81ff">0x05</span>]
+</span></span><span style="display:flex;"><span>arr2 <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0x82</span>, <span style="color:#ae81ff">0xf4</span>, <span style="color:#ae81ff">0xd1</span>, <span style="color:#ae81ff">0xa9</span>, <span style="color:#ae81ff">0xc6</span>, <span style="color:#ae81ff">0x57</span>, <span style="color:#ae81ff">0x30</span>, <span style="color:#ae81ff">0xde</span>]
+</span></span><span style="display:flex;"><span>arr3[<span style="color:#ae81ff">256</span>]
+</span></span></code></pre></div><p>Looking at the algorithm itself, I noticed it initializes two variables to zero and then fills a 256-byte array by incrementing through them.</p>
+<p>I recognized this as RC4 using <a href="https://ctf-wiki.mahaloz.re/reverse/Identify-Encode-Encryption/introduction/#rc4">this reference</a> and was able to decrypt the flag array.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>flag_array <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0x65</span>, <span style="color:#ae81ff">0x23</span>, <span style="color:#ae81ff">0xca</span>, <span style="color:#ae81ff">0x3d</span>, <span style="color:#ae81ff">0xc4</span>, <span style="color:#ae81ff">0xde</span>, <span style="color:#ae81ff">0xc6</span>, <span style="color:#ae81ff">0x21</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0x98</span>, <span style="color:#ae81ff">0x4b</span>, <span style="color:#ae81ff">0xd6</span>, <span style="color:#ae81ff">0x9c</span>, <span style="color:#ae81ff">0x6d</span>, <span style="color:#ae81ff">0xf6</span>, <span style="color:#ae81ff">0x1a</span>, <span style="color:#ae81ff">0xb9</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0xe5</span>, <span style="color:#ae81ff">0xfb</span>, <span style="color:#ae81ff">0xdb</span>, <span style="color:#ae81ff">0xc7</span>, <span style="color:#ae81ff">0x22</span>, <span style="color:#ae81ff">0xff</span>, <span style="color:#ae81ff">0x64</span>, <span style="color:#ae81ff">0x88</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0xf3</span>, <span style="color:#ae81ff">0x5c</span>, <span style="color:#ae81ff">0x8c</span>, <span style="color:#ae81ff">0x07</span>, <span style="color:#ae81ff">0xcb</span>, <span style="color:#ae81ff">0xfd</span>, <span style="color:#ae81ff">0x3d</span>, <span style="color:#ae81ff">0xa6</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">0xd8</span>, <span style="color:#ae81ff">0xb3</span>, <span style="color:#ae81ff">0xdb</span>, <span style="color:#ae81ff">0xf7</span>, <span style="color:#ae81ff">0x5a</span>, <span style="color:#ae81ff">0xe9</span>, <span style="color:#ae81ff">0x85</span>, <span style="color:#ae81ff">0x22</span>, <span style="color:#ae81ff">0x05</span>
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>key <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0x82</span>, <span style="color:#ae81ff">0xf4</span>, <span style="color:#ae81ff">0xd1</span>, <span style="color:#ae81ff">0xa9</span>, <span style="color:#ae81ff">0xc6</span>, <span style="color:#ae81ff">0x57</span>, <span style="color:#ae81ff">0x30</span>, <span style="color:#ae81ff">0xde</span>]
+</span></span><span style="display:flex;"><span>S <span style="color:#f92672">=</span> list(range(<span style="color:#ae81ff">256</span>))
+</span></span><span style="display:flex;"><span>j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>out <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">256</span>):
+</span></span><span style="display:flex;"><span>    j <span style="color:#f92672">=</span> (j <span style="color:#f92672">+</span> S[i] <span style="color:#f92672">+</span> key[i <span style="color:#f92672">%</span> len(key)]) <span style="color:#f92672">%</span> <span style="color:#ae81ff">256</span>
+</span></span><span style="display:flex;"><span>    S[i], S[j] <span style="color:#f92672">=</span> S[j], S[i]
+</span></span><span style="display:flex;"><span>i <span style="color:#f92672">=</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> char <span style="color:#f92672">in</span> flag_array:
+</span></span><span style="display:flex;"><span>    i <span style="color:#f92672">=</span> (i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">256</span>
+</span></span><span style="display:flex;"><span>    j <span style="color:#f92672">=</span> (j <span style="color:#f92672">+</span> S[i]) <span style="color:#f92672">%</span> <span style="color:#ae81ff">256</span>
+</span></span><span style="display:flex;"><span>    S[i], S[j] <span style="color:#f92672">=</span> S[j], S[i]
+</span></span><span style="display:flex;"><span>    out <span style="color:#f92672">+=</span> chr(char <span style="color:#f92672">^</span> S[(S[i] <span style="color:#f92672">+</span> S[j]) <span style="color:#f92672">%</span> <span style="color:#ae81ff">256</span>])
+</span></span><span style="display:flex;"><span>print(out)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># SVIUSCG{NowYouCanDoPackedWindowsFiles!}</span>
+</span></span></code></pre></div><p>Running the script gives us the flag, which I verified against the binary:</p>
+<pre tabindex="0"><code>.\WinHardPacked.exe &#34;SVIUSCG{NowYouCanDoPackedWindowsFiles!}&#34;
+You beat a packed Windows executable! Wow!
+</code></pre><p>Overall this was a very fun challenge.</p>
+
+        </section>
+        <div class="post-tags">
+          
+          
+          <nav class="nav tags">
+            <ul class="tags">
+              
+              <li><a href="/tags/ctfs/">CTFs</a></li>
+              
+              <li><a href="/tags/reversing/">Reversing</a></li>
+              
+            </ul>
+          </nav>
+          
+          
+        </div>
+      </div>
+
+      
+      
+    </div>
+
+    </article>
+</main>
+<footer>
+  <div style="display:flex"></div>
+  <div class="footer-info">
+    2026  <a
+      href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+  </div>
+</footer>
+
+</div>
+    </body>
+</html>

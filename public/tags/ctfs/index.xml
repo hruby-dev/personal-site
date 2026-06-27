@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>_epsln</title>
-		<link>//localhost:1313/</link>
-		<description>Recent content on _epsln</description>
+		<title>CTFs on _epsln</title>
+		<link>//localhost:1313/tags/ctfs/</link>
+		<description>Recent content in CTFs on _epsln</description>
 		<generator>Hugo</generator>
 		<language>en-us</language>
 		
@@ -12,20 +12,13 @@
 		
 			<lastBuildDate>Sat, 27 Jun 2026 00:00:00 +0000</lastBuildDate>
 		
-			<atom:link href="//localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+			<atom:link href="//localhost:1313/tags/ctfs/index.xml" rel="self" type="application/rss+xml" />
 			<item>
 				<title>WinHardPacked - US Cyber Open 2026 - Writeup</title>
 				<link>//localhost:1313/posts/winhardpacked_writeup/</link>
 				<pubDate>Sat, 27 Jun 2026 00:00:00 +0000</pubDate>
 				<guid>//localhost:1313/posts/winhardpacked_writeup/</guid>
 				<description>&lt;p&gt;We are presented with a windows executable. I first ran &lt;code&gt;file&lt;/code&gt; to check whether it was somehow mutated or needed patching for some reason.&lt;/p&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;file WinHardPacked.exe&#xD;&#xA;WinHardPacked.exe: PE32 executable for MS Windows 5.00 (console), Intel i386, UPX compressed, 3 sections&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;I noticed the executable was compressed with UPX, so I unpacked it before doing anything else.&lt;/p&gt;&#xA;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;upx -d WinHardPacked.exe -o unpacked_winhard.exe&#xA;&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;I opened the entrypoint in the decompiler and saw it was referencing a function &lt;code&gt;FUN_0040153d&lt;/code&gt;, so I jumped into it:&lt;/p&gt;</description>
-			</item>
-			<item>
-				<title></title>
-				<link>//localhost:1313/about/</link>
-				<pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-				<guid>//localhost:1313/about/</guid>
-				<description>&lt;p&gt;tba&lt;/p&gt;</description>
 			</item>
 	</channel>
 </rss>

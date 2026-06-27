@@ -3,8 +3,6 @@ baseURL = 'www.hruby.xyz'
 locale = 'en-us'
 title = '_epsln'
 pygmentsstyle = "monokai"
-pygmentscodefences = true
-pygmentscodefencesguesssyntax = true
 [params]
     color="dark"
 	mode="auto"
@@ -13,3 +11,25 @@ pygmentscodefencesguesssyntax = true
 [caches]
   [caches.images]
     dir = ':cacheDir/images'
+
+# Main menu Items
+
+[[menu.main]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[menu.main]]
+name = "All posts"
+url = "/posts"
+weight = 2
+
+[[menu.main]]
+name = "About"
+url = "/about"
+weight = 3
+
+[[menu.main]]
+name = "Tags"
+url = "/tags"
+weight = 4
